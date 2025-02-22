@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e8f5e9; /* Light green background */
+            margin: 0;
+            padding: 20px;
+        }
+        .status-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff; /* White background */
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .status-header {
+            font-size: 36px;
+            color: #388e3c; /* Dark green */
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #c8e6c9; /* Light green */
+        }
+        th {
+            background-color: #a5d6a7; /* Lighter green for header */
+            color: #2e7d32; /* Medium green */
+            font-size: 18px;
+        }
+        td {
+            color: #2e7d32; /* Medium green */
+        }
+        .status-item:last-child td {
+            border-bottom: none;
+        }
+        .cancel-button {
+            background-color: #d32f2f; /* Red background */
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="status-container">
+        <div class="status-header">Bed Status</div>
+        <table id="statusTable">
+            <thead>
+                <tr>
+                    <th>Hostel Name</th>
+                    <th>Room Number</th>
+                    <th>Bed Number</th>
+                    <th>Status</th>
+                    <th>Booked At</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="statusList"></tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const username = urlParams.get('username');
+
+            if (!username) {
+                window.location.href = "index.html";
+            }
+
+            function fetchData() {
+                fetch(`/api/user_bed_status?username=${username}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const statusList = document.getElementById('statusList');
+                        statusList.innerHTML = '';
+                        if (data.message) {
+                            statusList.innerHTML = `<tr><td colspan="6">${data.message}</td></tr>`;
+                        } else {
+                            data.forEach(item => {
+                                const statusRow = document.createElement('tr');
+                                statusRow.className = 'status-item';
+                                statusRow.innerHTML = `
+                                    <td>${item.name}</td>
+                                    <td>${item.room_number}</td>
+                                    <td>${item.bed_number}</td>
+                                    <td>${item.status}</td>
+                                    <td>${new Date(item.booked_at).toLocaleString()}</td>
+                                    <td><button class="cancel-button" data-bed-number="${item.bed_number}">Cancel</button></td>
+                                `;
+                                statusList.appendChild(statusRow);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching bed status:', error);
+                        const statusList = document.getElementById('statusList');
+                        statusList.innerHTML = `<tr><td colspan="6">Error fetching bed status</td></tr>`;
+                    });
+            }
+
+            fetchData();
+
+            document.getElementById('statusList').addEventListener('click', function(event) {
+                if (event.target.classList.contains('cancel-button')) {
+                    const bedNumber = event.target.getAttribute('data-bed-number');
+                    console.log(`Cancel button clicked for bed number: ${bedNumber}`);
+                    fetch('/api/delete_bed', {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ username, bed_number: bedNumber })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Response from server:', data);
+                        if (data.message === 'Bed detail deleted successfully') {
+                            fetchData(); // Refresh the data
+                        } else {
+                            console.error('Error:', data.message);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+            });
+        });
+    </script>
+</body>
+</html>

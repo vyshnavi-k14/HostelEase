@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="styles1.css">
+    <style>
+        .animated {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+        .fade-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .admin-animation {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .admin-step {
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+        .admin-step i {
+            font-size: 2em;
+            color: #007bff;
+        }
+        .admin-step p {
+            margin-top: 5px;
+            color: #333;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        @keyframes fadeInSteps {
+            0%, 25%, 50%, 75% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            12.5%, 37.5%, 62.5%, 87.5% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .step1 {
+            animation: fadeInSteps 4s 0.5s forwards;
+        }
+        .step2 {
+            animation: fadeInSteps 4s 1.5s forwards;
+        }
+        .step3 {
+            animation: fadeInSteps 4s 2.5s forwards;
+        }
+        .step4 {
+            animation: fadeInSteps 4s 3.5s forwards;
+        }
+        .login-section h2 {
+            font-size: 2em;
+            color: #007bff;
+            margin-bottom: 20px;
+            animation: fadeInText 1s ease-out;
+        }
+        @keyframes fadeInText {
+            0% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container main-container d-flex flex-column align-items-center justify-content-center min-vh-100">
+        <h1 class="mb-4">Hostel Management</h1>
+        <div class="row w-100">
+            <div class="col-md-6 admin-animation">
+                <div class="admin-step step1">
+                    <i class="fas fa-user-cog"></i>
+                    <p>Manage Rooms</p>
+                </div>
+                <div class="admin-step step2">
+                    <i class="fas fa-user-shield"></i>
+                    <p>Ensure Security</p>
+                </div>
+                <div class="admin-step step3">
+                    <i class="fas fa-file-alt"></i>
+                    <p>Review Applications</p>
+                </div>
+                <div class="admin-step step4">
+                    <i class="fas fa-users"></i>
+                    <p>Monitor Residents</p>
+                </div>
+            </div>
+            <div class="col-md-6 login-section">
+                <h2>Admin Login</h2>
+                <form id="adminLoginForm" class="animated">
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="username" placeholder="Username" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="form-control" name="password" placeholder="Password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                </form>
+                <a href="index.html" class="d-block mt-3">Back to Student Login</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        function storeUsername() {
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const username = urlParams.get('username');
+            if (username) {
+                localStorage.setItem('username', username);
+            }
+        }
+
+        // Call storeUsername on page load
+        window.onload = function() {
+            storeUsername();
+            setTimeout(() => {
+                document.querySelectorAll('.animated').forEach((element) => {
+                    element.classList.add('fade-in');
+                });
+            }, 100); // Adding a slight delay for a better effect
+        }
+
+        const adminLoginForm = document.getElementById('adminLoginForm');
+
+        adminLoginForm.addEventListener('submit', (event) => {
+            event.preventDefault(); // Prevent default form submission
+
+            const formData = new FormData(adminLoginForm);
+            const username = formData.get('username');
+            const password = formData.get('password');
+
+            fetch('/api/admin_login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password }),
+            })
+            .then(response => response.json()) // Parse the response as JSON
+            .then(data => {
+                if (data.message === 'Admin login successful') {
+                    // Redirect to dashboard and append username
+                    window.location.href = `admindashboard.html?username=${data.username}`;
+                } else {
+                    alert('Login failed: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error sending login request:', error);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hostel Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <div class="header">
+        <div class="profile" onclick="toggleProfileMenu()">
+            <img src="profile.gif" alt="Profile Picture">
+            <span id="username">hiii</span>
+            <div class="profile-menu" id="profileMenu">
+                <a href="#" id="applicationNumber">📄 Application Number</a>
+                <a href="status.html" id="statusLink">🔄 Status</a>
+                <a href="#" onclick="logout()">🔓 Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="slider-container">
+        <div class="slider-background">
+            <div class="slider-description" id="sliderDescription"></div>
+        </div>
+        <div class="slider-wrapper" id="sliderWrapper">
+            <!-- Slides will be added here dynamically -->
+        </div>
+        <div class="slider-navigation">
+            <button onclick="prevSlide()">&#10094;</button>
+            <button onclick="nextSlide()">&#10095;</button>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

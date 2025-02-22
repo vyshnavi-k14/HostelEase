@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rejected Requests</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e9f0f5;
+        }
+        header {
+            background-color: #f44336; /* Red color for header */
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+        main {
+            padding: 20px;
+            max-width: 1200px;
+            margin: auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .search-bar {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .search-bar input {
+            padding: 10px;
+            width: 50%;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .search-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            background-color: #f44336; /* Red color for search button */
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .search-button:hover {
+            background-color: #d32f2f; /* Darker red on hover */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f44336; /* Red color for table header */
+            color: white;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Rejected Requests</h1>
+    </header>
+    <main>
+        <section>
+           
+            <div class="search-bar">
+                <label for="searchInput">Search by Student Application Number:</label>
+                <input type="text" id="searchInput" oninput="filterRequests()" placeholder="Enter application number">
+                <button class="search-button" onclick="filterRequests()">Search</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Application Number</th>
+                        <th>Hostel Name</th>
+                        <th>Room Number</th>
+                        <th>Bed Number</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="rejectedRequestsTableBody">
+                    <!-- Rejected requests will be dynamically inserted here -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', fetchRejectedRequests);
+
+        function fetchRejectedRequests() {
+            fetch('/api/rejectedRequests')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const tableBody = document.getElementById('rejectedRequestsTableBody');
+                    tableBody.innerHTML = ''; // Clear existing rows
+                    data.forEach(request => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${request.user_id}</td>
+                            <td>${request.name}</td>
+                            <td>${request.room_number}</td>
+                            <td>${request.bed_number}</td>
+                            <td>${request.status}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error fetching rejected requests:', error));
+        }
+
+        function filterRequests() {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#rejectedRequestsTableBody tr');
+
+            rows.forEach(row => {
+                const applicationNumber = row.cells[0].textContent.toLowerCase();
+                if (applicationNumber.includes(searchInput)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

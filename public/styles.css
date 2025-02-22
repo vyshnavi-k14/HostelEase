@@ -1,0 +1,123 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+}
+
+.main-container {
+    text-align: center;
+}
+
+h1 {
+    color: #007bff;
+    font-size: 3em;
+    font-weight: bold;
+    margin-bottom: 20px;
+    animation: fadeInText 1s ease-out;
+}
+
+h2 {
+    font-size: 2em;
+    color: #333;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+}
+
+.login-section {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.booking-animation {
+    margin-bottom: 20px;
+}
+
+.booking-step {
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.booking-step i {
+    font-size: 2em;
+    color: #007bff;
+}
+
+.booking-step p {
+    margin-top: 5px;
+    color: #333;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.fade-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@keyframes fadeInSteps {
+    0%, 25%, 50%, 75% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    12.5%, 37.5%, 62.5%, 87.5% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.step1 {
+    animation: fadeInSteps 4s 0.5s forwards;
+}
+
+.step2 {
+    animation: fadeInSteps 4s 1.5s forwards;
+}
+
+.step3 {
+    animation: fadeInSteps 4s 2.5s forwards;
+}
+
+.step4 {
+    animation: fadeInSteps 4s 3.5s forwards;
+}
+
+@keyframes fadeInText {
+    0% { opacity: 0; transform: translateY(-20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-control {
+    height: 45px;
+    font-size: 16px;
+}
+
+.btn {
+    font-size: 18px;
+    padding: 10px;
+}
+
+a {
+    color: #007bff;
+}
+
+a:hover {
+    text-decoration: none;
+    color: #0056b3;
+}

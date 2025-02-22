@@ -1,0 +1,184 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #e9ecef;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    width: 90%;
+    max-width: 1000px;
+    background: #fff;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    position: relative;
+    overflow-y: auto;
+    height: 90vh;
+    font-family: Arial, sans-serif;
+}
+
+.header {
+    width: 100%;
+    background-color: #343a40;
+    color: white;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.profile {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.profile img {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+}
+
+.profile-menu {
+    display: none;
+    position: absolute;
+    top: 60px;
+    left: 10px;
+    background: #fff;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    z-index: 1000;
+}
+
+.profile-menu a {
+    display: flex;
+    align-items: center;
+    padding: 5px 0;
+    color: #343a40;
+    text-decoration: none;
+}
+
+.profile-menu a:hover {
+    text-decoration: underline;
+}
+
+h1 {
+    text-align: center;
+    color: #343a40;
+}
+
+.fee-info {
+    margin-bottom: 20px;
+}
+
+.fee-info ul {
+    list-style: none;
+    padding: 0;
+    color: #495057;
+}
+
+.rooms {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.room {
+    background: #f8f9fa;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    grid-column: span 2;
+    grid-row: span 2;
+    position: relative;
+}
+
+.red {
+    background-color: red;
+}
+
+.orange {
+    background-color: orange;
+}
+
+.room .beds {
+    display: none;
+    justify-content: space-between;
+    margin-top: 10px;
+    gap: 10px;
+}
+
+.room .bed {
+    background: #6c757d;
+    color: white;
+    padding: 5px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.room.selected {
+    border-color: #007bff;
+    background: #e2e6ea;
+}
+
+.room .bed.selected {
+    background: #007bff;
+}
+
+.bed.selected {
+    background-color: #D3D3D3; /* Change the color to indicate selection */
+    pointer-events: none; /* Disable further clicks */
+}
+
+.selected {
+    background-color: blue; /* Example: Change background color to indicate selection */
+}
+
+.floor-container {
+    margin-bottom: 40px;
+}
+
+.floor-title {
+    text-align: center;
+    background: #6c757d;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.selection {
+    margin-top: 20px;
+    text-align: center;
+}
+
+#confirm {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#confirm:hover {
+    background-color: #0056b3;
+}
+
+.room.all-confirmed-pending {
+    background-color: red;
+}
+
+.room.not-all-confirmed-pending {
+    background-color: lightblue;
+}

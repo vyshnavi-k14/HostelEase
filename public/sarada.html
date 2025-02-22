@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Booking</title>
+    <style>
+        /* Your existing styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e1e9f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            position: relative;
+            overflow-y: auto;
+            height: 90vh;
+            font-family: Arial, sans-serif;
+        }
+
+        .header {
+            width: 100%;
+            background-color: #343a40;
+            color: white;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .profile img {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .profile-menu {
+            display: none;
+            position: absolute;
+            top: 60px;
+            left: 10px;
+            background: #fff;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            z-index: 1000;
+        }
+
+        .profile-menu a {
+            display: flex;
+            align-items: center;
+            padding: 5px 0;
+            color: #343a40;
+            text-decoration: none;
+        }
+
+        .profile-menu a:hover {
+            text-decoration: underline;
+        }
+
+        h1 {
+            text-align: center;
+            color: #343a40;
+        }
+
+        .fee-info {
+            margin-bottom: 20px;
+        }
+
+        .fee-info ul {
+            list-style: none;
+            padding: 0;
+            color: #495057;
+        }
+
+        .rooms {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .room {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            grid-column: span 2;
+            grid-row: span 2;
+            position: relative;
+        }
+        
+        .red {
+            background-color: red;
+        }
+        .orange{
+            background-color:orange;
+        }
+
+        .room .beds {
+            display: none;
+            justify-content: space-between;
+            margin-top: 10px;
+            gap: 10px;
+        }
+
+        .room .bed {
+            background: #6c757d;
+            color: white;
+            padding: 5px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .room.selected {
+            border-color: #007bff;
+            background: #e2e6ea;
+        }
+
+        .room .bed.selected {
+            background: #007bff;
+        }
+        .bed.selected {
+            background-color: #D3D3D3; /* Change the color to indicate selection */
+            pointer-events: none; /* Disable further clicks */
+        }
+
+        .selected {
+            background-color: blue; /* Example: Change background color to indicate selection */
+        }
+
+        .floor-container {
+            margin-bottom: 40px;
+        }
+
+        .floor-title {
+            text-align: center;
+            background: #6c757d;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .selection {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #confirm {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #confirm:hover {
+            background-color: #0056b3;
+        }
+        .room.all-confirmed-pending {
+            background-color: red;
+        }
+        
+        .room.not-all-confirmed-pending {
+            background-color: lightblue;
+        }
+        .bed.red {
+            background-color: red;
+        }
+        
+        .bed.orange {
+            background-color: orange;
+        }
+    </style>
+    <script>
+        function toggleProfileMenu() {
+            const menu = document.getElementById('profileMenu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+    
+        function navigateToStatus() {
+            const username = new URLSearchParams(window.location.search).get('username');
+            window.location.href = `/status?username=${username}`;
+        }
+    
+        function logout() {
+            // Perform logout operations, such as clearing session or token
+            console.log('Logging out...');
+    
+            // Redirect to login page (or home page)
+            window.location.href = '/login';
+        }
+   
+        
+        function confirmSelection() {
+            const username = new URLSearchParams(window.location.search).get('username');
+            const hostelId = document.getElementById('hostelId').value;
+            const selectedRoom = document.querySelector('.room.selected');
+            const selectedBed = selectedRoom.querySelector('.bed.selected');
+    
+            if (!selectedRoom || !selectedBed) {
+                alert('Please select a room and a bed before confirming.');
+                return;
+            }
+    
+            let roomNumber = selectedRoom.textContent.trim();
+            roomNumber = roomNumber.split('\n')[0].trim(); // Extract the actual room number if it contains bed numbers
+    
+            const bedNumber = selectedBed.getAttribute('data-bed');
+            const selection = { room_number: roomNumber, bed_number: bedNumber, hostel_id: hostelId, user_id: username };
+    
+            console.log('Confirming Selection:', selection);
+    
+            // Send the final confirmation to the server
+            fetch('/api/selectBed', { // Make sure the endpoint matches your route setup
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(selection)
+            })
+            .then(response => {
+                console.log('Response status:', response.status); // Log status for debugging
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.message); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success:', data);
+                alert('Your bed has been successfully booked!');
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                if (error.message === 'You have already selected a bed previously') {
+                    alert('You have an active request. Please close the request to make new one.');
+                } else {
+                    alert('This bed has been selected by others.');
+                }
+            });
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM fully loaded and parsed');
+            const hostelId = document.getElementById('hostelId').value;
+        
+            console.log(`Hostel ID: ${hostelId}`);
+        
+            fetch(`/api/rooms?hostel_id=${hostelId}`)
+                .then(response => {
+                    console.log('Response received');
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Data fetched:', data);
+        
+                    data.forEach(room => {
+                        console.log(`Processing room: ${room.room_number}, color: ${room.color}`);
+                        const roomElement = document.querySelector(`.room[data-room="${room.room_number}"]`);
+                        console.log('Room Element:', roomElement); // Log the room element
+                        if (roomElement) {
+                            console.log(`Setting color for room ${room.room_number}`);
+                            roomElement.classList.add(room.color); // Add the color class
+        
+                            if (room.color === 'red') {
+                                roomElement.style.pointerEvents = 'none'; // Disable pointer events if color is red
+                            }
+        
+                            // Optionally, you can add a click handler to show a message or prevent default behavior
+                            roomElement.addEventListener('click', event => {
+                                if (room.color === 'red') {
+                                    event.preventDefault(); // Prevent default click behavior
+                                    console.log('Room is red and cannot be clicked.');
+                                    // Optionally show a message or handle the disabled state
+                                }
+                            });
+        
+                            // Process each bed in the room
+                            room.beds.forEach(bed => {
+                                console.log(`Processing bed: ${bed.bed_number}, color: ${bed.color}`);
+                                const bedElement = roomElement.querySelector(`.bed[data-bed="${bed.bed_number}"]`);
+                                if (bedElement) {
+                                    console.log(`Setting color for bed ${bed.bed_number}`);
+                                    bedElement.classList.add(bed.color); // Add the color class
+        
+                                    // Optionally, you can add a click handler to show a message or prevent default behavior
+                                    bedElement.addEventListener('click', event => {
+                                        if (bed.color === 'red') {
+                                            event.preventDefault(); // Prevent default click behavior
+                                            console.log('Bed is red and cannot be clicked.');
+                                            // Optionally show a message or handle the disabled state
+                                        }
+                                    });
+                                } else {
+                                    console.log(`Bed element for ${bed.bed_number} not found`);
+                                }
+                            });
+                        } else {
+                            console.log(`Room element for ${room.room_number} not found`);
+                        }
+                    });
+                })
+                .catch(error => console.error('Error fetching room data:', error));
+        });
+        
+        
+        function setRoomColor(roomElement, statuses) {
+            console.log(`Setting room color based on statuses: ${statuses}`);
+            const allConfirmedOrPending = statuses.every(status => status === 'confirmed' || status === 'pending');
+            if (allConfirmedOrPending) {
+                roomElement.classList.add('all-confirmed-pending');
+                roomElement.classList.remove('not-all-confirmed-pending');
+            } else {
+                roomElement.classList.remove('all-confirmed-pending');
+                roomElement.classList.add('not-all-confirmed-pending');
+            }
+        }
+        
+
+        function toggleBeds(roomElement,floor) {
+            // Deselect all rooms
+            document.querySelectorAll('.room').forEach(room => room.classList.remove('selected'));
+    
+                console.log("Toggling beds for room on floor:", floor);
+            
+            // Select the clicked room
+            roomElement.classList.add('selected');
+        
+            // Show the beds of the selected room
+            const beds = roomElement.querySelector('.beds');
+            document.querySelectorAll('.beds').forEach(b => b.style.display = 'none');
+            beds.style.display = 'flex';
+        }
+        
+        function selectBed(event, bedElement) {
+            event.stopPropagation(); // Prevent the room click event from firing
+            console.log("Bed selected:", bedElement.getAttribute("data-bed"));
+        
+            // Deselect all previously selected beds
+            document.querySelectorAll('.bed.selected').forEach(bed => bed.classList.remove('selected'));
+        
+            // Select the clicked bed
+            bedElement.classList.add('selected');
+        
+            // Deselect all previously selected rooms
+            document.querySelectorAll('.room.selected').forEach(room => room.classList.remove('selected'));
+        
+            // Select the room containing the selected bed
+            const roomElement = bedElement.closest('.room');
+            roomElement.classList.add('selected');
+        }
+        
+        
+        
+        
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Sarada Hostel(Non AC)</h1>
+        <div class="fee-info">
+            <p>Fee : 85,000/-</p>
+        </div>
+
+        <input type="hidden" id="hostelId" value=3>
+        <div class="floor-container">
+            <h2 class="floor-title">Ground Floor </h2>
+            <div id="roomsContainer" class="rooms">
+                <div class="room" data-room="101" style="grid-column: 1 / 2; grid-row: 1;" onclick="toggleBeds(this)">
+                    101
+                    <div class="beds">
+                        <div class="bed" data-bed="B1" onclick="selectBed(event, this)">B1</div>
+                        <div class="bed" data-bed="B2" onclick="selectBed(event, this)">B2</div>
+                        <div class="bed" data-bed="B3" onclick="selectBed(event, this)">B3</div>
+                    </div>
+                </div>
+                <div class="room" data-room="102" style="grid-column: 2 / 3; grid-row: 1;" onclick="toggleBeds(this)">
+                    102
+                    <div class="beds">
+                        <div class="bed" data-bed="B1" onclick="selectBed(event, this)">B1</div>
+                        <div class="bed" data-bed="B2" onclick="selectBed(event, this)">B2</div>
+                        <div class="bed" data-bed="B3" onclick="selectBed(event, this)">B3</div>
+                    </div>
+                </div>
+                <div class="room" data-room="103" style="grid-column: 3/ 4; grid-row: 1;" onclick="toggleBeds(this)">
+                    103
+                    <div class="beds">
+                        <div class="bed" data-bed="B1" onclick="selectBed(event, this)">B1</div>
+                        <div class="bed" data-bed="B2" onclick="selectBed(event, this)">B2</div>
+                        <div class="bed" data-bed="B3" onclick="selectBed(event, this)">B3</div>
+                    </div>
+                </div>
+                <div class="room" data-room="104" style="grid-column: 4 / 5; grid-row: 1;" onclick="toggleBeds(this)">
+                    104
+                    <div class="beds">
+                        <div class="bed" data-bed="B1" onclick="selectBed(event, this)">B1</div>
+                        <div class="bed" data-bed="B2" onclick="selectBed(event, this)">B2</div>
+                        <div class="bed" data-bed="B3" onclick="selectBed(event, this)">B3</div>
+                    </div>
+                </div>
+                <div class="room" data-room="105" style="grid-column: 5 / 6; grid-row: 1;" onclick="toggleBeds(this)">
+                    105
+                    <div class="beds">
+                        <div class="bed" data-bed="B1" onclick="selectBed(event, this)">B1</div>
+                        <div class="bed" data-bed="B2" onclick="selectBed(event, this)">B2</div>
+                        <div class="bed" data-bed="B3" onclick="selectBed(event, this)">B3</div>
+                    </div>
+                </div>
+                
+                <div class="room"  data-room="106" style="grid-column: 6 / 7; grid-row: 1;" onclick="toggleBeds(this)">
+                    106
+                    <div class="beds">
+                        <div class="bed" data-bed="B1" onclick="selectBed(event, this)">B1</div>
+                        <div class="bed" data-bed="B2" onclick="selectBed(event, this)">B2</div>
+                        <div class="bed" data-bed="B3" onclick="selectBed(event, this)">B3</div>
+                    </div>
+                </div>
+                <div class="room" data-room="107" style="grid-column: 7 / 8; grid-row: 1;" onclick="toggleBeds(this)">
+                    107
+                    <div class="beds">
+                        <div class="bed" data-bed="B1" onclick="selectBed(event, this)">B1</div>
+                        <div class="bed" data-bed="B2" onclick="selectBed(event, this)">B2</div>
+                        <div class="bed" data-bed="B3" onclick="selectBed(event, this)">B3</div>
+                    </div>
+                </div>
+                <div class="room" data-room="108" style="grid-column: 8 / 9; grid-row: 1;" onclick="toggleBeds(this)">
+                    108
+                    <div class="beds">
+                        <div class="bed" data-bed="B1" onclick="selectBed(event, this)">B1</div>
+                        <div class="bed" data-bed="B2" onclick="selectBed(event, this)">B2</div>
+                        <div class="bed" data-bed="B3" onclick="selectBed(event, this)">B3</div>
+                    </div>
+                </div>
+                <div class="room" data-room="109" style="grid-column: 9/ 10; grid-row: 1;" onclick="toggleBeds(this)">
+                    109
+                    <div class="beds">
+                        <div class="bed" data-bed="B1" onclick="selectBed(event, this)">B1</div>
+                        <div class="bed" data-bed="B2" onclick="selectBed(event, this)">B2</div>
+                        <div class="bed" data-bed="B3" onclick="selectBed(event, this)">B3</div>
+                    </div>
+                </div>
+                <div class="room" data-room="110" style="grid-column: 9/ 11; grid-row: 1;" onclick="toggleBeds(this)">
+                    110
+                    <div class="beds">
+                        <div class="bed" data-bed="B1" onclick="selectBed(event, this)">B1</div>
+                        <div class="bed" data-bed="B2" onclick="selectBed(event, this)">B2</div>
+                        <div class="bed" data-bed="B3" onclick="selectBed(event, this)">B3</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="floor-container">
+            <h2 class="floor-title">First Floor</h2>
+            <div id="roomsContainer" class="rooms">
+                <div class="room" data-room="201" style="grid-column: 1 / 2; grid-row: 1;" onclick="toggleBeds(this)">
+                    201
+                    <div class="beds">
+                        <div class="bed" data-bed="B1" onclick="selectBed(event, this)">B1</div>
+                        <div class="bed" data-bed="B2" onclick="selectBed(event, this)">B2</div>
+                        <div class="bed" data-bed="B3" onclick="selectBed(event, this)">B3</div>
+                    </div>
+                </div>
+                <div class="room" data-room="202" style="grid-column: 2 / 3; grid-row: 1;" onclick="toggleBeds(this)">
+                    202
+                    <div class="beds">
+                        <div class="bed" data-bed="B1" onclick="selectBed(event, this)">B1</div>
+                        <div class="bed" data-bed="B2" onclick="selectBed(event, this)">B2</div>
+                        <div class="bed" data-bed="B3" onclick="selectBed(event, this)">B3</div>
+                    </div>
+                </div>
+                <div class="room" data-room="203" style="grid-column: 3/ 4; grid-row: 1;" onclick="toggleBeds(this)">
+                    203
+                    <div class="beds">
+                        <div class="bed" data-bed="B1" onclick="selectBed(event, this)">B1</div>
+                        <div class="bed" data-bed="B2" onclick="selectBed(event, this)">B2</div>
+                        <div class="bed" data-bed="B3" onclick="selectBed(event, this)">B3</div>
+                    </div>
+                </div>
+                <div class="room" data-room="204" style="grid-column: 4 / 5; grid-row: 1;" onclick="toggleBeds(this)">
+                    204
+                    <div class="beds">
+                        <div class="bed" data-bed="B1" onclick="selectBed(event, this)">B1</div>
+                        <div class="bed" data-bed="B2" onclick="selectBed(event, this)">B2</div>
+                        <div class="bed" data-bed="B3" onclick="selectBed(event, this)">B3</div>
+                    </div>
+                </div>
+                <div class="room" data-room="205" style="grid-column: 5 / 6; grid-row: 1;" onclick="toggleBeds(this)">
+                    205
+                    <div class="beds">
+                        <div class="bed" data-bed="B1" onclick="selectBed(event, this)">B1</div>
+                        <div class="bed" data-bed="B2" onclick="selectBed(event, this)">B2</div>
+                        <div class="bed" data-bed="B3" onclick="selectBed(event, this)">B3</div>
+                    </div>
+                </div>
+                
+                <div class="room"  data-room="206" style="grid-column: 6 / 7; grid-row: 1;" onclick="toggleBeds(this)">
+                    206
+                    <div class="beds">
+                        <div class="bed" data-bed="B1" onclick="selectBed(event, this)">B1</div>
+                        <div class="bed" data-bed="B2" onclick="selectBed(event, this)">B2</div>
+                        <div class="bed" data-bed="B3" onclick="selectBed(event, this)">B3</div>
+                    </div>
+                </div>
+                <div class="room" data-room="207" style="grid-column: 7 / 8; grid-row: 1;" onclick="toggleBeds(this)">
+                    207
+                    <div class="beds">
+                        <div class="bed" data-bed="B1" onclick="selectBed(event, this)">B1</div>
+                        <div class="bed" data-bed="B2" onclick="selectBed(event, this)">B2</div>
+                        <div class="bed" data-bed="B3" onclick="selectBed(event, this)">B3</div>
+                    </div>
+                </div>
+                <div class="room" data-room="208" style="grid-column: 8 / 9; grid-row: 1;" onclick="toggleBeds(this)">
+                    208
+                    <div class="beds">
+                        <div class="bed" data-bed="B1" onclick="selectBed(event, this)">B1</div>
+                        <div class="bed" data-bed="B2" onclick="selectBed(event, this)">B2</div>
+                        <div class="bed" data-bed="B3" onclick="selectBed(event, this)">B3</div>
+                    </div>
+                </div>
+                <div class="room" data-room="209" style="grid-column: 9/ 10; grid-row: 1;" onclick="toggleBeds(this)">
+                    209
+                    <div class="beds">
+                        <div class="bed" data-bed="B1" onclick="selectBed(event, this)">B1</div>
+                        <div class="bed" data-bed="B2" onclick="selectBed(event, this)">B2</div>
+                        <div class="bed" data-bed="B3" onclick="selectBed(event, this)">B3</div>
+                    </div>
+                </div>
+                <div class="room" data-room="210" style="grid-column: 9/ 11; grid-row: 1;" onclick="toggleBeds(this)">
+                    210
+                    <div class="beds">
+                        <div class="bed" data-bed="B1" onclick="selectBed(event, this)">B1</div>
+                        <div class="bed" data-bed="B2" onclick="selectBed(event, this)">B2</div>
+                        <div class="bed" data-bed="B3" onclick="selectBed(event, this)">B3</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="selection">
+            <button id="confirm" onclick="confirmSelection()">Confirm</button>
+        </div>
+    </div>
+
+   
+</body>
+</html>
